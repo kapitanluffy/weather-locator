@@ -12,18 +12,11 @@ use Cmfcmf\OpenWeatherMap\Exception as OWMException;
  * Converted private methods to protected visibility
  * to allow us to extend the main OpenWeatherMap class
  */
-class OpenWeatherMapProxy
+class OpenWeatherMapProxy extends OpenWeatherMap
 {
-    protected $owm;
-
     protected $urls = [
         'find' => 'http://api.openweathermap.org/data/2.5/find?'
     ];
-
-    public function __construct($apiKey)
-    {
-        $this->owm = new OpenWeatherMap($apiKey);
-    }
 
     /**
      * Get cities in cycle
@@ -77,7 +70,7 @@ class OpenWeatherMapProxy
         $queryUrl = $this->buildQueryUrlParameter($query);
 
         $url = $url."$queryUrl&units=$units&lang=$lang&mode=$mode&APPID=";
-        $url .= empty($appid) ? $this->owm->getApiKey() : $appid;
+        $url .= empty($appid) ? $this->getApiKey() : $appid;
 
         return $url;
     }
