@@ -1,0 +1,175 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="//unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<link rel="stylesheet" type="text/css" href="/scripts/awesomplete/awesomplete.css">
+
+<style type="text/css">
+#map {
+  height: 800px;
+  z-index: 0;
+}
+
+.data--map_marker,
+.data--city {
+  display: none;
+}
+
+.weather-table .row-label {
+    text-align: right;
+    font-weight: bold;
+}
+
+.weather-head {
+    text-align: center;
+}
+
+.weather-head > .location {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+#form-box {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script src="//unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="/scripts/awesomplete/awesomplete.min.js"></script>
+
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+  var Map = function(center) {
+    this.options = {
+      mapContainerId: 'map',
+      mapZoom: 13,
+      markerClass: '.data--map_marker'
+    }
+
+    this.map = L.map(this.options.mapContainerId).setView(center, this.options.mapZoom)
+
+    L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(this.map)
+
+    this.addMarker = function (pos, dom, open) {
+      open = open || false
+
+      dom = dom.cloneNode(true)
+      dom.style.display = null
+      dom.classList.remove(this.options.markerClass.substr(1))
+
+      var marker = L.marker(pos)
+      marker.bindPopup(dom)
+      marker.addTo(this.map)
+
+      if (open ==  true) marker.openPopup()
+
+      return marker
+    }
+  }
+
+  var city = JSON.parse(document.querySelector('.data--city').dataset.city)
+
+  if (city != false) {
+    var mapp = new Map([city.lat || 0, city.lon || 0])
+
+    document.querySelectorAll(mapp.options.markerClass).forEach(function (value, index) {
+      var weather = JSON.parse(value.dataset.weather)
+      var open = (city.name.toLowerCase() == weather.city.name.toLowerCase())
+      var marker = mapp.addMarker([weather.city.lat, weather.city.lon], value, open)
+    })
+  }
+
+  var ac = document.querySelector('.autocomplete')
+  var awsom = new Awesomplete(ac, {
+    replace: function (item) {
+      this.input.value = item.label
+    },
+    data: function (item, input) {
+      return { label: item.zip_code + ' ' + item.name, value: item };
+    }
+  });
+
+  ac.addEventListener('awesomplete-selectcomplete', function(e) {
+    var zip_code = document.querySelector('input[name=zip_code]')
+    zip_code.value = e.text.value.zip_code
+
+    var place_name = document.querySelector('input[name=place_name]')
+    place_name.value = e.text.value.name
+  })
+
+  ac.addEventListener('input', function () {
+    if (this.value.length <= 2) return;
+
+    var ajax = new XMLHttpRequest();
+
+    ajax.onload = function() {
+      if (ajax.status == 404) return;
+      var response = JSON.parse(ajax.responseText)
+      awsom._list = response.data
+      awsom.evaluate()
+    };
+
+    ajax.open("GET", this.dataset.source + "?q=" + this.value, true);
+    ajax.send();
+  })
+});
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div id="form-box" class="row">
+        <div class="col-md-12">
+            <form class="form-inline">
+                <div class="form-group form-group-lg">
+                    <input type="text" class="form-control autocomplete" value="{{ zip_code }} {{ place_name }}" data-source="{{ places_source }}" />
+                    <input type="hidden" name="place_name" value="{{ place_name }}" />
+                    <input type="hidden" name="zip_code" value="{{ zip_code }}" />
+                    <input type="submit" value="search" class="form-control btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div id="map"></div>
+        <div>
+    <div>
+</div>
+
+<span class="data--city" data-city='{{ city|default([])|json_encode|raw }}'></span>
+
+{% for weather in weathers|default([]) %}
+<span class="data--map_marker" data-weather='{{ weather|json_encode|raw }}'>
+    <div class="weather-head">
+        <div class="location">{{ weather.city.name }}</div>
+        <div class="icon"><img src="{{ weather.weather.getIconUrl() }}" /></div>
+    </div>
+    <table class="weather-table">
+        <tr><td class="row-label">Temperature:&nbsp;</td><td>{{ weather.temperature.getFormatted() }}</td></tr>
+        <tr><td class="row-label">Humidity:&nbsp;</td><td>{{ weather.humidity.getFormatted() }}</td></tr>
+        <tr><td class="row-label">Pressure:&nbsp;</td><td>{{ weather.pressure.getFormatted() }}</td></tr>
+        <tr><td class="row-label">Wind:&nbsp;</td><td>{{ weather.wind.speed.getFormatted() }} / {{ weather.wind.direction.getFormatted() }}</td></tr>
+        <tr><td class="row-label">Clouds:&nbsp;</td><td>{{ weather.clouds.description }}</td></tr>
+        <tr><td class="row-label">Rain:&nbsp;</td><td>{{ weather.precipitation.description }}</td></tr>
+    </table>
+</span>
+{% else %}
+{% endfor %}
+{% endblock %}

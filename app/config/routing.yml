@@ -1,0 +1,11 @@
+# app:
+#     resource: '@AppBundle/Controller/'
+#     type: annotation
+
+map:
+  path: /
+  controller: AppBundle\Controller\MapController::index
+
+places:
+  path: /places
+  controller: AppBundle\Controller\MapController::places
