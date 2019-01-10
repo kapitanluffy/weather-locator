@@ -1,77 +1,45 @@
-Symfony Standard Edition
-========================
+## Installation
 
-**WARNING**: This distribution does not support Symfony 4. See the
-[Installing & Setting up the Symfony Framework][15] page to find a replacement
-that fits you best.
+1. Clone the git repository by entering the following command in your terminal
+```
+git clone git@github.com:kapitanluffy/weather-locator.git
+```
 
-Welcome to the Symfony Standard Edition - a fully-functional Symfony
-application that you can use as the skeleton for your new applications.
+2. Install composer dependencies by entering the following command in your terminal.
+```
+composer install
+```
 
-For details on how to download and get started with Symfony, see the
-[Installation][1] chapter of the Symfony Documentation.
+3. Download database [here](https://drive.google.com/open?id=12O5EkwF6FEXcWugHyy0TKhhbv0re_gw-)
 
-What's inside?
---------------
+4. Copy database to `./var/data/data.sqlite`.
 
-The Symfony Standard Edition is configured with the following defaults:
+This app was built and tested under `PHP 7.1`
 
-  * An AppBundle you can use to start coding;
+## Running
 
-  * Twig as the only configured template engine;
+1. You can use the built in php web server by running the following command in your terminal.
+```
+php bin/console server:run
+```
 
-  * Doctrine ORM/DBAL;
+2. Access the app in your preferred browser by putting the following url in the address bar.
+```
+http://localhost:8000/
+```
 
-  * Swiftmailer;
+You can use also use a dedicated web server of your choice. Popular choices are `nginx` and `apache`.
+You just need to take note that you should point the "public" directory to `./web`
 
-  * Annotations enabled for everything.
+Configuration and setup will vary depending to the web server of your choice.
+I suggest you refer to the documentation of the web server of your choice for setting this up.
 
-It comes pre-configured with the following bundles:
+## Testing
 
-  * **FrameworkBundle** - The core Symfony framework bundle
+Run unit tests by entering the following command in your terminal.
 
-  * [**SensioFrameworkExtraBundle**][6] - Adds several enhancements, including
-    template and routing annotation capability
+```
+php vendor/bin/simple-phpunit
+```
 
-  * [**DoctrineBundle**][7] - Adds support for the Doctrine ORM
-
-  * [**TwigBundle**][8] - Adds support for the Twig templating engine
-
-  * [**SecurityBundle**][9] - Adds security by integrating Symfony's security
-    component
-
-  * [**SwiftmailerBundle**][10] - Adds support for Swiftmailer, a library for
-    sending emails
-
-  * [**MonologBundle**][11] - Adds support for Monolog, a logging library
-
-  * **WebProfilerBundle** (in dev/test env) - Adds profiling functionality and
-    the web debug toolbar
-
-  * **SensioDistributionBundle** (in dev/test env) - Adds functionality for
-    configuring and working with Symfony distributions
-
-  * [**SensioGeneratorBundle**][13] (in dev env) - Adds code generation
-    capabilities
-
-  * [**WebServerBundle**][14] (in dev env) - Adds commands for running applications
-    using the PHP built-in web server
-
-  * **DebugBundle** (in dev/test env) - Adds Debug and VarDumper component
-    integration
-
-All libraries and bundles included in the Symfony Standard Edition are
-released under the MIT or BSD license.
-
-Enjoy!
-
-[1]:  https://symfony.com/doc/3.4/setup.html
-[6]:  https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/index.html
-[7]:  https://symfony.com/doc/3.4/doctrine.html
-[8]:  https://symfony.com/doc/3.4/templating.html
-[9]:  https://symfony.com/doc/3.4/security.html
-[10]: https://symfony.com/doc/3.4/email.html
-[11]: https://symfony.com/doc/3.4/logging.html
-[13]: https://symfony.com/doc/current/bundles/SensioGeneratorBundle/index.html
-[14]: https://symfony.com/doc/current/setup/built_in_web_server.html
-[15]: https://symfony.com/doc/current/setup.html
+*Take note that all commands are assumed to be run in the applications root directory*
