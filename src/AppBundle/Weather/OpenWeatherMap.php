@@ -15,8 +15,42 @@ class OpenWeatherMap implements WeatherInterface
         $this->owm = $owm;
     }
 
-    public function get($lat, $lon)
+    public function get($lat, $lon, $atLeast = 10)
     {
-        return $this->owm->getCitiesInCycle($lat, $lon);
+        $weathers = $this->owm->getCitiesInCycle($lat, $lon);
+        $fetched = [];
+        $last = 0;
+
+        while (count($weathers) < $atLeast && $last != count($weathers)) {
+            $last = count($weathers);
+
+            foreach ($weathers as $weather) {
+                // @todo decorate owm with caching
+                if (in_array($weather->city->id, $fetched) == true) continue;
+
+                $extras = $this->owm->getCitiesInCycle($weather->city->lat, $weather->city->lon);
+                $fetched[] = $weather->city->id;
+                $weathers = array_merge($weathers, $extras);
+                $this->unique($weathers);
+            }
+        }
+
+        return array_slice($weathers, 0, $atLeast);
+    }
+
+    protected function unique(&$weathers)
+    {
+        $ids = [];
+
+        foreach ($weathers as $key => $weather) {
+            if (in_array($weather->city->id, $ids) == false) {
+                $ids[] = $weather->city->id;
+                continue;
+            }
+
+            if (in_array($weather->city->id, $ids) == true) {
+                unset($weathers[$key]);
+            }
+        }
     }
 }
