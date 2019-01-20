@@ -15,6 +15,7 @@ class MapController extends Controller
     {
         $placeName = $request->get('place_name');
         $zipCode = $request->get('zip_code');
+        $count = $request->get('count', 10);
 
         $data = [
             'place_name' => $placeName,
@@ -34,7 +35,7 @@ class MapController extends Controller
 
         $data['city'] = $city->toArray();
 
-        $weathers = $weather->get($city->lat(), $city->lon());
+        $weathers = $weather->get($city->lat(), $city->lon(), $count);
 
         if ($weathers == false) {
             return $this->render('map/index.html.twig', $data);

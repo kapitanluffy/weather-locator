@@ -101,7 +101,8 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     data: function (item, input) {
       return { label: item.zip_code + ' ' + item.name, value: item };
-    }
+    },
+    autoFirst: true
   });
 
   ac.addEventListener('awesomplete-selectcomplete', function(e) {
@@ -138,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <form class="form-inline">
                 <div class="form-group form-group-lg">
                     <input type="text" class="form-control autocomplete" value="{{ zip_code }} {{ place_name }}" data-source="{{ places_source }}" />
+                    <input type="number" class="form-control" value="10" name="count" min="10" max="20" />
                     <input type="hidden" name="place_name" value="{{ place_name }}" />
                     <input type="hidden" name="zip_code" value="{{ zip_code }}" />
                     <input type="submit" value="search" class="form-control btn btn-primary" />

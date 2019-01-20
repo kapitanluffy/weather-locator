@@ -15,6 +15,15 @@ class OpenWeatherMap implements WeatherInterface
         $this->owm = $owm;
     }
 
+    /**
+     * Get weather data based on lat and lon
+     *
+     * @param  string $lat
+     * @param  string $lon
+     * @param  int    $atLeast
+     *
+     * @return array
+     */
     public function get($lat, $lon, $atLeast = 10)
     {
         $weathers = $this->owm->getCitiesInCycle($lat, $lon);
