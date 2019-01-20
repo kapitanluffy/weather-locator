@@ -3,6 +3,7 @@
 use AppBundle\Weather\OpenWeatherMap;
 use Cmfcmf\OpenWeatherMap as BaseOpenWeatherMap;
 use Cmfcmf\OpenWeatherMap\CurrentWeather;
+use Cmfcmf\OpenWeatherMap\Util\City;
 use Symfony\Bundle\FrameworkBundle\Tests\TestCase;
 
 class OpenWeatherMapTest extends TestCase
@@ -16,6 +17,8 @@ class OpenWeatherMapTest extends TestCase
         $weather = $this->getMockBuilder(CurrentWeather::class)
             ->disableOriginalConstructor()
             ->getMock();
+
+        $weather->city = new City(1, 'foo', -35, 149, 'bar', 0);
 
         $base->method('getCitiesInCycle')
             ->with(-35, 149)
