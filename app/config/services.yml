@@ -42,8 +42,7 @@ services:
         tags: ['controller.service_arguments']
 
     AppBundle\Weather\WeatherInterface: '@app.weather'
-    # AppBundle\CityLocator\CityLocatorInterface: '@app.citylocator'
-    AppBundle\CityLocator\CityLocatorInterface: '@AppBundle\CityLocator\CityLocator'
+    AppBundle\CityLocator\CityLocatorInterface: '@app.citylocator'
 
     # add more services, or override services that need manual wiring
     # AppBundle\Service\ExampleService:
