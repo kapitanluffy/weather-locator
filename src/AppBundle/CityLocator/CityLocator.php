@@ -4,10 +4,13 @@ namespace AppBundle\CityLocator;
 
 use Doctrine\ORM\EntityManagerInterface;
 use AppBundle\CityLocator\City;
+use AppBundle\CityLocator\CityLocatorInterface;
 
-class CityLocator
+class CityLocator implements CityLocatorInterface
 {
     protected $pdo;
+
+    const EARTH_RADIUS_KM = 6371;
 
     public function __construct(EntityManagerInterface $em)
     {
@@ -69,5 +72,48 @@ class CityLocator
         return array_map(function ($result) {
             return new City($result);
         }, $results);
+    }
+
+    public function getNearbyCities(City $city, $limit = 10, $radius = 100)
+    {
+        $query = "SELECT * FROM (SELECT *, latitude || ',' || longitude as coordinates FROM cities) a GROUP BY coordinates;";
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute();
+        $nearby = [];
+
+        while ($row = $stmt->fetch()) {
+            $distance = $this->calculateDistance($city->lat(), $city->lon(), $row['latitude'], $row['longitude']);
+            $row['distance'] = $distance;
+
+            if ($distance <= $radius) {
+                $nearby[] = $row;
+            }
+        }
+
+        usort($nearby, function ($a, $b) {
+            if ($a['distance'] >= $b['distance']) return 1;
+            if ($a['distance'] < $b['distance']) return -1;
+        });
+
+        $nearby = array_map(function ($n) {
+            return new City($n);
+        }, array_slice($nearby, 0, $limit));
+
+        return $nearby;
+    }
+
+    protected function calculateDistance($x1, $y1, $x2, $y2)
+    {
+        $x1 = deg2rad($x1);
+        $y1 = deg2rad($y1);
+        $x2 = deg2rad($x2);
+        $y2 = deg2rad($y2);
+
+        $delta = $y2 - $y1;
+        $a = pow(cos($x2) * sin($delta), 2) + pow(cos($x1) * sin($x2) - sin($x1) * cos($x2) * cos($delta), 2);
+        $b = sin($x1) * sin($x2) + cos($x2) * cos($x1) * cos($delta);
+
+        $angle = atan2(sqrt($a), $b);
+        return $angle * self::EARTH_RADIUS_KM;
     }
 }

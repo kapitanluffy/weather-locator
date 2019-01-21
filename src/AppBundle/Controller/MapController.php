@@ -5,13 +5,14 @@ namespace AppBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use AppBundle\CityLocator\CityLocator;
+use AppBundle\CityLocator\CityLocatorInterface;
+use AppBundle\CityLocator\City;
 use AppBundle\Weather\WeatherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class MapController extends Controller
 {
-    public function index(Request $request, WeatherInterface $weather, CityLocator $cityLocator)
+    public function index(Request $request, WeatherInterface $weather, CityLocatorInterface $cityLocator)
     {
         $placeName = $request->get('place_name');
         $zipCode = $request->get('zip_code');
@@ -33,19 +34,35 @@ class MapController extends Controller
             return $this->render('map/index.html.twig', $data);
         }
 
+        $main = $weather->get($city->lat(), $city->lon());
+
+        if ($main->city == null) {
+            return $this->render('map/index.html.twig', $data);
+        }
+
+        // convert Util\City to CityLocator\City
+        $city = new City([
+            'country_code' => $main->city->country,
+            'place_name' => $main->city->name,
+            'postal_code' => $city->zipCode(),
+            'latitude' => $main->city->lat,
+            'longitude' => $main->city->lon,
+            'original' => $main->city
+        ]);
         $data['city'] = $city->toArray();
 
-        $weathers = $weather->get($city->lat(), $city->lon(), $count);
+        $nearby = $cityLocator->getNearbyCities($city, $count - 1, 1000);
+        $weathers = [$main];
 
-        if ($weathers == false) {
-            return $this->render('map/index.html.twig', $data);
+        foreach ($nearby as $n) {
+            $weathers[] = $weather->get($n->lat(), $n->lon());
         }
 
         $data['weathers'] = $weathers;
         return $this->render('map/index.html.twig', $data);
     }
 
-    public function places(Request $request, CityLocator $cityLocator)
+    public function places(Request $request, CityLocatorInterface $cityLocator)
     {
         $place = $request->get('q');
 
