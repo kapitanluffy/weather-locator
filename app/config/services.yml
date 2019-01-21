@@ -22,6 +22,10 @@ services:
         class: AppBundle\Weather\OpenWeatherMap
         arguments: ['@app.openweathermap']
 
+    app.citylocator:
+        class: AppBundle\CityLocator\GeoBytesCityLocator
+        arguments: ['@AppBundle\CityLocator\CityLocator']
+
     # makes classes in src/AppBundle available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     AppBundle\:
@@ -38,6 +42,8 @@ services:
         tags: ['controller.service_arguments']
 
     AppBundle\Weather\WeatherInterface: '@app.weather'
+    # AppBundle\CityLocator\CityLocatorInterface: '@app.citylocator'
+    AppBundle\CityLocator\CityLocatorInterface: '@AppBundle\CityLocator\CityLocator'
 
     # add more services, or override services that need manual wiring
     # AppBundle\Service\ExampleService:
